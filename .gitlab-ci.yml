@@ -1,0 +1,76 @@
+stages: [quality, publish, deploy]
+
+frontend-quality:
+  stage: quality
+  image: node:24-alpine
+  cache:
+    key: frontend-${CI_COMMIT_REF_SLUG}
+    paths: [frontend/.npm/]
+  script:
+    - cd frontend
+    - npm ci --cache .npm --prefer-offline
+    - npm run lint
+    - npm run typecheck
+    - npm run build
+
+backend-quality:
+  stage: quality
+  image: python:3.12-slim
+  script:
+    - cd backend
+    - pip install -e ".[dev]"
+    - ruff check app tests alembic
+    - pytest
+
+bot-quality:
+  stage: quality
+  image: python:3.12-slim
+  script:
+    - cd bot
+    - pip install -r requirements.txt ruff
+    - ruff check app
+    - python -m compileall -q app
+
+publish-images:
+  stage: publish
+  image: docker:27-cli
+  services:
+    - name: docker:27-dind
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  parallel:
+    matrix:
+      - COMPONENT: [frontend, backend, bot]
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
+  script:
+    - SITE_URL="${PRODUCTION_URL:-http://localhost}"
+    - docker build --pull --build-arg NEXT_PUBLIC_API_URL=/api --build-arg NEXT_PUBLIC_SITE_URL="$SITE_URL" -t "$CI_REGISTRY_IMAGE/$COMPONENT:$CI_COMMIT_SHA" -t "$CI_REGISTRY_IMAGE/$COMPONENT:latest" "$COMPONENT"
+    - docker push "$CI_REGISTRY_IMAGE/$COMPONENT:$CI_COMMIT_SHA"
+    - docker push "$CI_REGISTRY_IMAGE/$COMPONENT:latest"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+
+deploy-production:
+  stage: deploy
+  image: alpine:3.22
+  needs: [publish-images]
+  environment:
+    name: production
+    url: $PRODUCTION_URL
+  before_script:
+    - apk add --no-cache openssh-client
+    - install -m 700 -d ~/.ssh
+    - echo "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    - echo "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
+  script:
+    - tar -czf deployment.tgz docker-compose.prod.yml nginx
+    - scp deployment.tgz "$VPS_USER@$VPS_HOST:/tmp/nazarovgroup-deployment.tgz"
+    - echo "$REGISTRY_PULL_PASSWORD" | ssh "$VPS_USER@$VPS_HOST" "docker login '$CI_REGISTRY' -u '$REGISTRY_PULL_USER' --password-stdin"
+    - ssh "$VPS_USER@$VPS_HOST" "mkdir -p '$VPS_DEPLOY_PATH' && tar -xzf /tmp/nazarovgroup-deployment.tgz -C '$VPS_DEPLOY_PATH' && cd '$VPS_DEPLOY_PATH' && IMAGE_PREFIX='$CI_REGISTRY_IMAGE' IMAGE_TAG='$CI_COMMIT_SHA' docker compose -f docker-compose.prod.yml pull && IMAGE_PREFIX='$CI_REGISTRY_IMAGE' IMAGE_TAG='$CI_COMMIT_SHA' docker compose -f docker-compose.prod.yml up -d --wait --wait-timeout 180 --remove-orphans"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: manual
