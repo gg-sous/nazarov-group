@@ -74,7 +74,7 @@ Frontend не знает о persistence и обращается к backend че�
 
    В PowerShell: `Copy-Item .env.example .env`.
 
-2. Обязательно замените `POSTGRES_PASSWORD` и `JWT_SECRET`. Для Telegram заполните `TELEGRAM_BOT_TOKEN` и `TELEGRAM_ADMIN_CHAT_ID`; ЮKassa можно оставить пустой.
+2. Обязательно замените `POSTGRES_PASSWORD` и `JWT_SECRET`. Для Telegram заполните `TELEGRAM_BOT_TOKEN` и отрицательный `TELEGRAM_GROUP_CHAT_ID`; ЮKassa можно оставить пустой.
 
 3. Соберите и запустите:
 
@@ -115,7 +115,7 @@ Volume `media_data` необходимо включить в резервное 
 | `NEXT_PUBLIC_API_URL` | Публичный base URL API, фиксируется при frontend build |
 | `NEXT_PUBLIC_SITE_URL` | Canonical origin для sitemap/metadata |
 | `TELEGRAM_BOT_TOKEN` | Token от BotFather; пустое значение включает health-only режим |
-| `TELEGRAM_ADMIN_CHAT_ID` | ID личного или группового чата-получателя |
+| `TELEGRAM_GROUP_CHAT_ID` | Отрицательный ID рабочей Telegram-группы; личные chat ID отклоняются |
 | `BOT_INTERNAL_SECRET` | Секрет backend → bot, минимум 32 случайных символа в production |
 | `BUSINESS_TIMEZONE` | Часовой пояс расписания, например `Asia/Yekaterinburg` |
 | `BOOKING_OPEN_TIME`, `BOOKING_CLOSE_TIME` | Рабочее окно в формате `HH:MM` |
@@ -208,14 +208,17 @@ pip install -r requirements.txt
 python -m app.main
 ```
 
-Health endpoint: `GET :8081/health` внутри Docker-сети. Настройка уведомлений:
+Health endpoint: `GET :8081/health` внутри Docker-сети. Уведомления направляются только в одну настроенную группу. Положительные ID личных чатов бот отклоняет.
 
-1. Создайте бота через BotFather и положите token в `TELEGRAM_BOT_TOKEN` файла `.env`.
-2. Запустите сервис: `docker compose up -d --build bot`.
-3. Отправьте боту `/start`: он ответит ID текущего чата.
-4. Запишите этот ID в `TELEGRAM_ADMIN_CHAT_ID` и выполните `docker compose up -d bot backend`.
+1. Откройте официальный `@BotFather`, выполните `/newbot`, задайте имя и username и скопируйте token.
+2. Добавьте бота в закрытую рабочую группу. Права администратора не нужны, если обычным участникам разрешено отправлять сообщения.
+3. Положите token в `TELEGRAM_BOT_TOKEN` файла `.env`, а `BOT_INTERNAL_SECRET` замените случайной строкой не короче 32 символов.
+4. Запустите bot без chat ID: `docker compose up -d --build bot`.
+5. В группе отправьте `/start` или `/start@username_бота`. Бот ответит отрицательным ID группы, обычно вида `-1001234567890`.
+6. Запишите его в `TELEGRAM_GROUP_CHAT_ID` файла `.env` и пересоздайте сервисы: `docker compose up -d --force-recreate bot backend`.
+7. Проверьте `docker compose logs --tail=100 bot backend`. Новая тестовая запись с сайта должна один раз появиться в группе.
 
-Для группового чата добавьте бота в группу и отправьте `/start` там; ID группы обычно отрицательный. Не отправляйте `.env` и token в Git. После новой записи бот получает только необходимые для обработки заявки поля. Если Telegram недоступен, backend выполняет повторные попытки с увеличивающейся задержкой.
+Если `/start` отправить боту лично, он не выдаст личный chat ID и предложит перейти в группу. Не публикуйте `.env` и token, не добавляйте их в Git и не присылайте в переписку. После новой записи бот получает только необходимые для обработки заявки поля. Если Telegram временно недоступен, backend хранит событие в PostgreSQL outbox и повторяет доставку с увеличивающейся задержкой. При преобразовании обычной группы в супергруппу Telegram может изменить ID; тогда повторите `/start` в группе и обновите `TELEGRAM_GROUP_CHAT_ID`.
 
 ## CI/CD
 

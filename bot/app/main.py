@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 from aiogram import Bot, Dispatcher, Router
+from aiogram.enums import ChatType
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 from aiohttp import web
@@ -18,10 +19,16 @@ router = Router()
 
 @router.message(CommandStart())
 async def start_command(message: Message) -> None:
+    if message.chat.type not in {ChatType.GROUP, ChatType.SUPERGROUP}:
+        await message.answer(
+            "Добавьте бота в рабочую группу NazarovGroup и отправьте там /start. "
+            "Уведомления о записях в личные сообщения не отправляются."
+        )
+        return
     await message.answer(
         "NazarovGroup bot работает.\n"
-        f"ID этого чата: <code>{message.chat.id}</code>\n\n"
-        "Укажите его в TELEGRAM_ADMIN_CHAT_ID и перезапустите сервис bot.",
+        f"ID этой группы: <code>{message.chat.id}</code>\n\n"
+        "Укажите его в TELEGRAM_GROUP_CHAT_ID и перезапустите сервис bot.",
         parse_mode="HTML",
     )
 
@@ -31,6 +38,23 @@ def _required_text(payload: dict[str, Any], field: str, limit: int) -> str:
     if not isinstance(value, str) or not value.strip() or len(value) > limit:
         raise web.HTTPBadRequest(text=f"Invalid {field}")
     return value.strip()
+
+
+def _group_chat_id_from_env(raw_value: str) -> int | None:
+    if not raw_value:
+        return None
+    try:
+        chat_id = int(raw_value)
+    except ValueError:
+        LOGGER.error("TELEGRAM_GROUP_CHAT_ID must be an integer")
+        return None
+    if chat_id >= 0:
+        LOGGER.error(
+            "TELEGRAM_GROUP_CHAT_ID must be a negative group/supergroup ID; "
+            "private chat IDs are rejected"
+        )
+        return None
+    return chat_id
 
 
 async def health(request: web.Request) -> web.Response:
@@ -50,8 +74,8 @@ async def booking_notification(request: web.Request) -> web.Response:
     if not expected_secret or not hmac.compare_digest(supplied_secret, expected_secret):
         raise web.HTTPUnauthorized(text="Unauthorized")
     bot: Bot | None = request.app["bot"]
-    chat_id: str = request.app["chat_id"]
-    if bot is None or not chat_id:
+    chat_id: int | None = request.app["chat_id"]
+    if bot is None or chat_id is None:
         raise web.HTTPServiceUnavailable(text="Telegram notifications are not configured")
     try:
         payload = await request.json()
@@ -85,7 +109,7 @@ async def booking_notification(request: web.Request) -> web.Response:
 async def notification_server(
     port: int,
     bot: Bot | None,
-    chat_id: str,
+    chat_id: int | None,
     secret: str,
 ) -> AsyncIterator[None]:
     app = web.Application(client_max_size=64 * 1024)
@@ -111,14 +135,15 @@ async def main() -> None:
         format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
     )
     token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
-    chat_id = os.getenv("TELEGRAM_ADMIN_CHAT_ID", "").strip()
+    chat_id = _group_chat_id_from_env(os.getenv("TELEGRAM_GROUP_CHAT_ID", "").strip())
     internal_secret = os.getenv("BOT_INTERNAL_SECRET", "").strip()
     health_port = int(os.getenv("BOT_HEALTH_PORT", "8081"))
     bot = Bot(token=token) if token else None
     polling_task: asyncio.Task[None] | None = None
-    if bot is None or not chat_id:
+    if bot is None or chat_id is None:
         LOGGER.warning(
-            "Telegram token or admin chat id is empty; notifications will be retried by backend"
+            "Telegram token or valid group chat id is missing; "
+            "notifications will be retried by backend"
         )
     try:
         if bot is not None:
@@ -127,7 +152,7 @@ async def main() -> None:
             polling_task = asyncio.create_task(
                 dispatcher.start_polling(bot, close_bot_session=False)
             )
-            LOGGER.info("Telegram polling started; send /start to obtain the chat id")
+            LOGGER.info("Telegram polling started; send /start in the target group to obtain its ID")
         async with notification_server(health_port, bot, chat_id, internal_secret):
             await asyncio.Event().wait()
     finally:

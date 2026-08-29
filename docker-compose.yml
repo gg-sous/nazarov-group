@@ -79,7 +79,7 @@ services:
         required: false
     environment:
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
-      TELEGRAM_ADMIN_CHAT_ID: ${TELEGRAM_ADMIN_CHAT_ID:-}
+      TELEGRAM_GROUP_CHAT_ID: ${TELEGRAM_GROUP_CHAT_ID:-}
       BOT_HEALTH_PORT: 8081
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
     healthcheck:
