@@ -1,11 +1,28 @@
 from datetime import date as Date
 from datetime import datetime
 from datetime import time as Time
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.models.booking import BookingStatus
+
+VehicleColor = Literal[
+    "Черный",
+    "Белый",
+    "Серый",
+    "Серебристый",
+    "Красный",
+    "Синий",
+    "Зеленый",
+    "Коричневый",
+    "Бежевый",
+    "Желтый",
+    "Оранжевый",
+    "Фиолетовый",
+    "Другой",
+]
 
 
 class BookingCreate(BaseModel):
@@ -13,6 +30,8 @@ class BookingCreate(BaseModel):
 
     client_name: str = Field(min_length=2, max_length=120)
     client_phone: str = Field(min_length=10, max_length=32, pattern=r"^[+\d\s()\-]+$")
+    vehicle_model: str = Field(min_length=2, max_length=160)
+    vehicle_color: VehicleColor
     service_id: str = Field(pattern=r"^[a-z0-9-]{2,80}$")
     date: Date
     start_time: Time
@@ -39,6 +58,8 @@ class BookingResponse(BaseModel):
     id: UUID
     status: BookingStatus
     service_name: str
+    vehicle_model: str
+    vehicle_color: str
     date: Date
     start_time: Time
     end_time: Time

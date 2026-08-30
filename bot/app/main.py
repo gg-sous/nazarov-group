@@ -41,6 +41,15 @@ def _required_text(payload: dict[str, Any], field: str, limit: int) -> str:
     return value.strip()
 
 
+def _optional_text(payload: dict[str, Any], field: str, limit: int, default: str) -> str:
+    value = payload.get(field)
+    if value is None:
+        return default
+    if not isinstance(value, str) or not value.strip() or len(value) > limit:
+        raise web.HTTPBadRequest(text=f"Invalid {field}")
+    return value.strip()
+
+
 def _group_chat_id_from_env(raw_value: str) -> int | None:
     if not raw_value:
         return None
@@ -88,6 +97,8 @@ async def booking_notification(request: web.Request) -> web.Response:
     booking_id = _required_text(payload, "booking_id", 64)
     client_name = _required_text(payload, "client_name", 120)
     client_phone = _required_text(payload, "client_phone", 32)
+    vehicle_model = _optional_text(payload, "vehicle_model", 160, "Не указано")
+    vehicle_color = _optional_text(payload, "vehicle_color", 40, "Не указано")
     service_name = _required_text(payload, "service_name", 160)
     booking_date = _required_text(payload, "date", 10)
     start_time = _required_text(payload, "start_time", 5)
@@ -96,6 +107,8 @@ async def booking_notification(request: web.Request) -> web.Response:
         "<b>Новая запись NazarovGroup</b>\n\n"
         f"Клиент: {html.escape(client_name)}\n"
         f"Телефон: <code>{html.escape(client_phone)}</code>\n"
+        f"Автомобиль: {html.escape(vehicle_model)}\n"
+        f"Цвет: {html.escape(vehicle_color)}\n"
         f"Услуга: {html.escape(service_name)}\n"
         f"Дата: {html.escape(booking_date)}\n"
         f"Время: {html.escape(start_time)}–{html.escape(end_time)}\n"

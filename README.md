@@ -174,6 +174,7 @@ uvicorn app.main:app --reload
 - `POST /api/admin/login`, `POST /api/admin/logout`, `GET /api/admin/session`;
 - `GET/PUT /api/admin/content`;
 - `GET /api/admin/bookings`, `PATCH /api/admin/bookings/{id}/status`;
+- `GET /api/admin/bookings/export.xlsx` — защищённая XLSX-выгрузка заказов и сводной статистики;
 - `POST /api/admin/media` — безопасная загрузка и автоматическая подготовка responsive WebP;
 - `/api/payments`;
 - `/api/webhooks/yookassa`.
@@ -198,7 +199,7 @@ alembic current
 alembic revision --autogenerate -m "describe change"
 ```
 
-Первая migration создаёт базовые `services`, `bookings` и PostgreSQL enum `booking_status`. Вторая добавляет JSONB-хранилище управляемого контента. Третья расширяет запись публичными данными и добавляет transactional outbox. Перед коммитом новой migration просмотрите generated SQL и проверьте downgrade.
+Первая migration создаёт базовые `services`, `bookings` и PostgreSQL enum `booking_status`. Вторая добавляет JSONB-хранилище управляемого контента. Третья расширяет запись публичными данными и добавляет transactional outbox. Четвёртая добавляет обязательные марку/модель и цвет автомобиля без потери старых записей. Перед коммитом новой migration просмотрите generated SQL и проверьте downgrade.
 
 ## Telegram bot
 

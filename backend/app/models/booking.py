@@ -23,6 +23,8 @@ class Booking(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
     client_name: Mapped[str] = mapped_column(String(120), nullable=False)
     client_phone: Mapped[str] = mapped_column(String(32), nullable=False)
+    vehicle_model: Mapped[str] = mapped_column(String(160), nullable=False)
+    vehicle_color: Mapped[str] = mapped_column(String(40), nullable=False)
     service_id: Mapped[UUID | None] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("services.id", ondelete="RESTRICT"), nullable=True, index=True
     )

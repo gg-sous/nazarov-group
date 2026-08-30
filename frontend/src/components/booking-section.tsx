@@ -10,6 +10,7 @@ import type { ServiceContent } from "@/types/content";
 import { createBooking, getBookingAvailability } from "@/services/booking-api";
 import { bookingSchema, type BookingFormValues } from "@/schemas/booking";
 import { Container } from "@/components/ui/container";
+import { vehicleColors } from "@/data/vehicles";
 
 const fieldClass =
   "mt-2 h-14 w-full rounded-none border border-white/15 bg-[#111] px-4 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-[#d71920]";
@@ -31,6 +32,8 @@ export function BookingSection({
     defaultValues: {
       clientName: "",
       clientPhone: "",
+      vehicleModel: "",
+      vehicleColor: "",
       serviceId: "",
       date: "",
       time: "",
@@ -103,6 +106,33 @@ export function BookingSection({
                 placeholder="+7 (___) ___-__-__"
                 {...register("clientPhone")}
               />
+            </Field>
+            <Field
+              label="Марка и модель автомобиля"
+              error={errors.vehicleModel?.message}
+            >
+              <input
+                className={fieldClass}
+                autoComplete="off"
+                placeholder="Например, BMW X5"
+                {...register("vehicleModel")}
+              />
+            </Field>
+            <Field label="Цвет автомобиля" error={errors.vehicleColor?.message}>
+              <select
+                className={fieldClass}
+                defaultValue=""
+                {...register("vehicleColor")}
+              >
+                <option value="" disabled>
+                  Выберите цвет
+                </option>
+                {vehicleColors.map((color) => (
+                  <option key={color} value={color}>
+                    {color}
+                  </option>
+                ))}
+              </select>
             </Field>
             <Field
               label="Услуга"

@@ -34,6 +34,14 @@ class ServiceContent(BaseModel):
     is_active: bool = True
     is_featured: bool = True
     sort_order: int = Field(default=0, ge=0, le=10_000)
+    image_url: str | None = Field(default=None, max_length=500)
+
+    @field_validator("image_url")
+    @classmethod
+    def validate_image_url(cls, value: str | None) -> str | None:
+        if value is None or re.fullmatch(MEDIA_URL_PATTERN, value):
+            return value
+        raise ValueError("Only uploaded service media can be used")
 
 
 class PortfolioContent(BaseModel):

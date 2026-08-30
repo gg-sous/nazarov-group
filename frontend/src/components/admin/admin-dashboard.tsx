@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+  Download,
   ExternalLink,
   ImagePlus,
   LogOut,
@@ -296,6 +297,36 @@ export function AdminDashboard({
     }
   }
 
+  async function uploadServiceImage(
+    index: number,
+    event: ChangeEvent<HTMLInputElement>,
+  ) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setMessage("");
+    const formData = new FormData();
+    formData.append("image", file);
+    try {
+      const response = await fetch("/api/admin/media", {
+        method: "POST",
+        credentials: "same-origin",
+        body: formData,
+      });
+      if (!response.ok) throw new Error(await readUploadError(response));
+      const result = (await response.json()) as MediaUploadResult;
+      updateService(index, { image_url: result.url });
+      setMessage(
+        `Изображение услуги обработано: ${result.width}×${result.height}, ${formatFileSize(result.original_bytes)} → ${formatFileSize(result.optimized_bytes)}. Нажмите «Сохранить изменения».`,
+      );
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Ошибка загрузки");
+    } finally {
+      setUploading(false);
+      event.target.value = "";
+    }
+  }
+
   async function logout() {
     await fetch("/api/admin/logout", {
       method: "POST",
@@ -436,9 +467,20 @@ export function AdminDashboard({
             title="Записи клиентов"
             description="Новые заявки, контактные данные и рабочие статусы без оплаты."
           >
+            <div className="mb-3 flex justify-end">
+              <a
+                href="/api/admin/bookings/export.xlsx"
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/10 bg-[#111] px-4 text-sm transition-colors hover:border-white/25 hover:bg-[#181818]"
+              >
+                <Download className="size-4 text-[#d71920]" />
+                Выгрузить Excel
+              </a>
+            </div>
             <div className="overflow-hidden rounded-xl border border-white/8 bg-[#111]">
               {bookings.length ? (
-                <div className="divide-y divide-white/8">
+                <div
+                  className={`divide-y divide-white/8 ${bookings.length > 5 ? "max-h-[570px] overflow-y-auto overscroll-contain" : ""}`}
+                >
                   {bookings.map((booking) => (
                     <article
                       key={booking.id}
@@ -454,6 +496,9 @@ export function AdminDashboard({
                         >
                           {booking.client_phone}
                         </a>
+                        <p className="mt-2 text-xs text-[#999]">
+                          {booking.vehicle_model} · {booking.vehicle_color}
+                        </p>
                       </div>
                       <div>
                         <p className="text-sm text-[#ddd]">
@@ -584,7 +629,9 @@ export function AdminDashboard({
             title="Услуги"
             description="Редактируйте карточки, цены, сроки и видимость."
           >
-            <div className="space-y-3">
+            <div
+              className={`space-y-3 ${content.services.length > 5 ? "max-h-[980px] overflow-y-auto overscroll-contain pr-2" : ""}`}
+            >
               {content.services.map((service, index) => (
                 <article
                   key={service.id}
@@ -636,6 +683,34 @@ export function AdminDashboard({
                         <Trash2 className="size-4" />
                       </button>
                     </div>
+                  </div>
+                  <div className="mb-5 grid gap-3 sm:grid-cols-[220px_1fr] sm:items-center">
+                    {service.image_url ? (
+                      <div className="relative aspect-video overflow-hidden rounded-lg bg-black">
+                        <MediaImage
+                          src={service.image_url}
+                          alt={service.title}
+                          fill
+                          sizes="220px"
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="grid aspect-video place-items-center rounded-lg border border-dashed border-white/10 bg-[#090909] text-xs text-[#666]">
+                        Изображение не загружено
+                      </div>
+                    )}
+                    <label className="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-white/15 text-sm">
+                      <ImagePlus className="size-4 text-[#d71920]" />
+                      {uploading ? "Загрузка…" : "Загрузить изображение услуги"}
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={(event) => uploadServiceImage(index, event)}
+                        disabled={uploading}
+                        className="sr-only"
+                      />
+                    </label>
                   </div>
                   <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                     <Field label="Название">
@@ -735,6 +810,7 @@ export function AdminDashboard({
                       is_active: false,
                       is_featured: false,
                       sort_order: (current.services.length + 1) * 10,
+                      image_url: null,
                     },
                   ],
                 }))
@@ -752,7 +828,9 @@ export function AdminDashboard({
             title="Работы"
             description="Названия, категории и визуальный тон карточек."
           >
-            <div className="grid gap-3 lg:grid-cols-3">
+            <div
+              className={`grid gap-3 lg:grid-cols-3 ${content.portfolio.length > 5 ? "max-h-[760px] overflow-y-auto overscroll-contain pr-2" : ""}`}
+            >
               {content.portfolio.map((item, index) => (
                 <article
                   key={item.id}

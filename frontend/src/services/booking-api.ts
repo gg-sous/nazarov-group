@@ -6,6 +6,8 @@ export type BookingResponse = {
   id: string;
   status: "confirmed";
   service_name: string;
+  vehicle_model: string;
+  vehicle_color: string;
   date: string;
   start_time: string;
   end_time: string;
@@ -20,6 +22,8 @@ export async function createBooking(
     body: JSON.stringify({
       client_name: values.clientName,
       client_phone: values.clientPhone,
+      vehicle_model: values.vehicleModel,
+      vehicle_color: values.vehicleColor,
       service_id: values.serviceId,
       date: values.date,
       start_time: values.time,

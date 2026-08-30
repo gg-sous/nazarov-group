@@ -18,6 +18,7 @@ export type ServiceContent = {
   is_active: boolean;
   is_featured: boolean;
   sort_order: number;
+  image_url: string | null;
 };
 export type PortfolioContent = {
   id: string;
@@ -61,5 +62,7 @@ export type AdminBooking = {
   end_time: string;
   client_name: string;
   client_phone: string;
+  vehicle_model: string;
+  vehicle_color: string;
   created_at: string;
 };

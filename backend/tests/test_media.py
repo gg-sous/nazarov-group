@@ -3,7 +3,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from app.services.media import process_uploaded_image, remove_media_urls
+from app.services.media import collect_media_urls, process_uploaded_image, remove_media_urls
 
 
 def test_image_is_converted_to_responsive_webp_variants(tmp_path: Path) -> None:
@@ -25,3 +25,8 @@ def test_image_is_converted_to_responsive_webp_variants(tmp_path: Path) -> None:
 
     remove_media_urls(tmp_path, {result.url})
     assert not (tmp_path / "safe_asset_123456").exists()
+
+
+def test_service_media_is_counted_as_referenced() -> None:
+    url = "/media/service_asset_123456/1920.webp"
+    assert collect_media_urls({"services": [{"image_url": url}]}) == {url}

@@ -103,6 +103,13 @@ def collect_media_urls(payload: dict[str, object]) -> set[str]:
         image_url = hero.get("image_url")
         if isinstance(image_url, str) and image_url.startswith("/media/"):
             urls.add(image_url)
+    services = payload.get("services")
+    if isinstance(services, list):
+        for item in services:
+            if isinstance(item, dict):
+                image_url = item.get("image_url")
+                if isinstance(image_url, str) and image_url.startswith("/media/"):
+                    urls.add(image_url)
     portfolio = payload.get("portfolio")
     if isinstance(portfolio, list):
         for item in portfolio:

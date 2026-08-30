@@ -75,6 +75,8 @@ async def create_booking(session: AsyncSession, payload: BookingCreate) -> Booki
     booking = Booking(
         client_name=payload.client_name,
         client_phone=_normalize_phone(payload.client_phone),
+        vehicle_model=payload.vehicle_model,
+        vehicle_color=payload.vehicle_color,
         service_id=None,
         service_slug=service.id,
         service_name=service.title,
@@ -92,6 +94,8 @@ async def create_booking(session: AsyncSession, payload: BookingCreate) -> Booki
                 "booking_id": str(booking.id),
                 "client_name": booking.client_name,
                 "client_phone": booking.client_phone,
+                "vehicle_model": booking.vehicle_model,
+                "vehicle_color": booking.vehicle_color,
                 "service_name": booking.service_name,
                 "date": booking.date.isoformat(),
                 "start_time": booking.start_time.strftime("%H:%M"),
@@ -166,6 +170,10 @@ async def list_bookings(session: AsyncSession, *, limit: int, offset: int) -> tu
     items = list((await session.scalars(booking_list_query().limit(limit).offset(offset))).all())
     total = int((await session.scalar(select(func.count()).select_from(Booking))) or 0)
     return items, total
+
+
+async def list_all_bookings(session: AsyncSession) -> list[Booking]:
+    return list((await session.scalars(booking_list_query())).all())
 
 
 async def update_booking_status(

@@ -34,6 +34,7 @@ export const defaultSiteContent: SiteContentBundle = {
     is_active: true,
     is_featured: true,
     sort_order: Number(service.marker) * 10,
+    image_url: service.image_url ?? null,
   })),
   portfolio: portfolioItems.map((item) => ({ ...item, image_url: null })),
   contacts: {

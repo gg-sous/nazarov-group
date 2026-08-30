@@ -4,6 +4,7 @@ import time
 from collections import defaultdict, deque
 from pathlib import Path
 from typing import Annotated
+from urllib.parse import quote
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, HTTPException, Request, Response, UploadFile, status
@@ -25,7 +26,8 @@ from app.schemas.content import (
     MediaUploadResponse,
     SiteContentBundle,
 )
-from app.services.bookings import list_bookings, update_booking_status
+from app.services.booking_export import build_booking_workbook
+from app.services.bookings import list_all_bookings, list_bookings, update_booking_status
 from app.services.content import get_site_content, save_site_content
 from app.services.media import (
     InvalidImageError,
@@ -137,6 +139,25 @@ async def read_bookings(
     )
 
 
+@router.get("/bookings/export.xlsx")
+async def export_bookings(
+    _: AdminDependency,
+    session: SessionDependency,
+) -> Response:
+    bookings = await list_all_bookings(session)
+    workbook = await asyncio.to_thread(build_booking_workbook, bookings)
+    filename = "Статистика-заказов-NazarovGroup.xlsx"
+    return Response(
+        content=workbook,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": (
+                f"attachment; filename=bookings-nazarovgroup.xlsx; filename*=UTF-8''{quote(filename)}"
+            ),
+            "Cache-Control": "no-store",
+            "X-Content-Type-Options": "nosniff",
+        },
+    )
 @router.patch(
     "/bookings/{booking_id}/status",
     response_model=AdminBookingResponse,

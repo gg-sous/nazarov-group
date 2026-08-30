@@ -5,6 +5,7 @@ export type Service = {
   priceFrom: string;
   duration: string;
   marker: string;
+  image_url?: string | null;
 };
 
 export const services: Service[] = [
