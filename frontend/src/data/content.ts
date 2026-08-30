@@ -3,15 +3,6 @@ import { services } from "@/data/services";
 import { legalLinks, siteConfig } from "@/data/site";
 import type { SiteContentBundle } from "@/types/content";
 
-const bookingDurationMinutes: Record<string, number> = {
-  "complex-detailing": 600,
-  "body-polishing": 600,
-  "ceramic-coating": 480,
-  "interior-cleaning": 480,
-  "detail-wash": 120,
-  "protective-coatings": 180,
-};
-
 export const defaultSiteContent: SiteContentBundle = {
   hero: {
     eyebrow: "Профессиональный детейлинг",
@@ -19,7 +10,7 @@ export const defaultSiteContent: SiteContentBundle = {
     title: "Характер в деталях",
     description:
       "Возвращаем автомобилю выразительность и защищаем результат — аккуратно, технологично, с вниманием к каждой поверхности.",
-    primary_button: "Записаться",
+    primary_button: "Записаться на осмотр",
     secondary_button: "Наши работы",
     image_url: "/og.png",
   },
@@ -29,8 +20,6 @@ export const defaultSiteContent: SiteContentBundle = {
     title: service.title,
     description: service.description,
     price_from: service.priceFrom,
-    duration: service.duration,
-    duration_minutes: bookingDurationMinutes[service.id] ?? 120,
     is_active: true,
     is_featured: true,
     sort_order: Number(service.marker) * 10,

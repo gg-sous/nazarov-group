@@ -62,7 +62,7 @@ export function SiteHeader() {
           className="hidden rounded-full bg-[#d71920] px-6 py-3 text-sm font-semibold transition hover:-translate-y-0.5 hover:bg-[#bd141b] sm:inline-flex"
           href="/#booking"
         >
-          Записаться
+          Записаться на осмотр
         </Link>
         <button
           className="relative z-50 grid size-11 shrink-0 place-items-center rounded-full border border-white/15 lg:hidden"
@@ -99,7 +99,7 @@ export function SiteHeader() {
           href="/#booking"
           onClick={() => setIsOpen(false)}
         >
-          Записаться
+          Записаться на осмотр
         </Link>
       </div>
     </header>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, Clock3 } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import type { Service } from "@/data/services";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -38,17 +38,12 @@ export function ServiceCard({ service }: { service: Service }) {
         </p>
       </div>
       <div className="mt-10 border-t border-white/10 px-5 pt-5 pb-5 sm:px-8 sm:pb-8">
-        <div className="flex items-center justify-between gap-4">
-          <span className="text-lg font-semibold">{service.priceFrom}</span>
-          <span className="flex items-center gap-2 text-xs text-zinc-500">
-            <Clock3 size={14} /> {service.duration}
-          </span>
-        </div>
+        <p className="text-lg font-semibold">{service.priceFrom}</p>
         <Link
           className="mt-6 inline-flex text-sm font-semibold underline decoration-zinc-700 underline-offset-8 transition hover:decoration-[#d71920]"
           href="/#booking"
         >
-          Выбрать услугу
+          Выбрать для осмотра
         </Link>
       </div>
     </article>

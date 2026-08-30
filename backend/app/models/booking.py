@@ -1,10 +1,9 @@
 from datetime import date, datetime, time
 from enum import StrEnum
-from uuid import UUID
 
-from sqlalchemy import Date, DateTime, Enum, ForeignKey, Index, String, Time, func
-from sqlalchemy.dialects.postgresql import UUID as PGUUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Date, DateTime, Enum, Index, String, Time, func, text
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
@@ -19,20 +18,26 @@ class BookingStatus(StrEnum):
 
 class Booking(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "bookings"
-    __table_args__ = (Index("ix_bookings_date_status", "date", "status"),)
+    __table_args__ = (
+        Index("ix_bookings_date_status", "date", "status"),
+        Index("ix_bookings_service_slugs_gin", "service_slugs", postgresql_using="gin"),
+        Index(
+            "uq_bookings_active_time",
+            "date",
+            "start_time",
+            unique=True,
+            postgresql_where=text("status IN ('waiting_payment', 'confirmed')"),
+        ),
+    )
 
     client_name: Mapped[str] = mapped_column(String(120), nullable=False)
     client_phone: Mapped[str] = mapped_column(String(32), nullable=False)
     vehicle_model: Mapped[str] = mapped_column(String(160), nullable=False)
     vehicle_color: Mapped[str] = mapped_column(String(40), nullable=False)
-    service_id: Mapped[UUID | None] = mapped_column(
-        PGUUID(as_uuid=True), ForeignKey("services.id", ondelete="RESTRICT"), nullable=True, index=True
-    )
-    service_slug: Mapped[str] = mapped_column(String(80), nullable=False, index=True)
-    service_name: Mapped[str] = mapped_column(String(160), nullable=False)
+    service_slugs: Mapped[list[str]] = mapped_column(JSONB, nullable=False)
+    service_names: Mapped[list[str]] = mapped_column(JSONB, nullable=False)
     date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     start_time: Mapped[time] = mapped_column(Time, nullable=False)
-    end_time: Mapped[time] = mapped_column(Time, nullable=False)
     consent_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -44,8 +49,3 @@ class Booking(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         default=BookingStatus.CONFIRMED,
         index=True,
     )
-
-    service: Mapped["Service | None"] = relationship(back_populates="bookings")
-
-
-from app.models.service import Service  # noqa: E402

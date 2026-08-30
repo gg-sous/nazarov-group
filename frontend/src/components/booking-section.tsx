@@ -34,7 +34,7 @@ export function BookingSection({
       clientPhone: "",
       vehicleModel: "",
       vehicleColor: "",
-      serviceId: "",
+      serviceIds: [],
       date: "",
       time: "",
       personalDataConsent: false,
@@ -45,17 +45,14 @@ export function BookingSection({
     mutationFn: createBooking,
     onSuccess: () => reset(),
   });
-  const [selectedService, selectedDate] = useWatch({
-    control,
-    name: ["serviceId", "date"],
-  });
+  const selectedDate = useWatch({ control, name: "date" });
   useEffect(() => {
     setValue("time", "");
-  }, [selectedDate, selectedService, setValue]);
+  }, [selectedDate, setValue]);
   const availability = useQuery({
-    queryKey: ["booking-availability", selectedService, selectedDate],
-    queryFn: () => getBookingAvailability(selectedService, selectedDate),
-    enabled: Boolean(selectedService && selectedDate),
+    queryKey: ["booking-availability", selectedDate],
+    queryFn: () => getBookingAvailability(selectedDate),
+    enabled: Boolean(selectedDate),
     staleTime: 15_000,
   });
 
@@ -70,18 +67,18 @@ export function BookingSection({
         <div className="grid gap-12 lg:grid-cols-[0.78fr_1.22fr] lg:gap-20">
           <div>
             <p className="flex items-center gap-3 text-xs font-semibold tracking-[0.25em] text-zinc-500 uppercase">
-              <span className="h-px w-7 bg-[#d71920]" /> Запись
+              <span className="h-px w-7 bg-[#d71920]" /> Первичный осмотр
             </p>
             <h2 className="mt-7 text-[2.2rem] leading-[0.98] font-semibold tracking-[-0.04em] uppercase sm:mt-8 sm:text-6xl sm:leading-[0.94]">
-              Обсудим ваш автомобиль
+              Запишитесь на первичный осмотр
             </h2>
             <p className="mt-6 max-w-md leading-7 text-zinc-400">
-              Выберите услугу и удобное время. После отправки запись появится у
-              администратора, а менеджер получит уведомление в Telegram.
+              Отметьте интересующие услуги и выберите свободный час. На осмотре
+              мы оценим автомобиль, уточним состав работ и финальную стоимость.
             </p>
             <div className="mt-8 border-l-2 border-[#d71920] pl-5 sm:mt-12">
               <p className="text-sm text-zinc-500">Без предоплаты</p>
-              <p className="mt-1 font-semibold">Запись подтверждается сразу</p>
+              <p className="mt-1 font-semibold">Осмотр подтверждается сразу</p>
             </div>
           </div>
 
@@ -134,26 +131,32 @@ export function BookingSection({
                 ))}
               </select>
             </Field>
-            <Field
-              label="Услуга"
-              error={errors.serviceId?.message}
-              className="sm:col-span-2"
-            >
-              <select
-                className={fieldClass}
-                defaultValue=""
-                {...register("serviceId")}
-              >
-                <option value="" disabled>
-                  Выберите услугу
-                </option>
+            <fieldset className="sm:col-span-2">
+              <legend className="text-sm text-zinc-400">
+                Интересующие услуги
+              </legend>
+              <div className="mt-2 grid gap-px border border-white/15 bg-white/10 sm:grid-cols-2">
                 {serviceOptions.map((service) => (
-                  <option key={service.id} value={service.id}>
-                    {service.title}
-                  </option>
+                  <label
+                    key={service.id}
+                    className="flex min-h-14 cursor-pointer items-center gap-3 bg-[#111] px-4 text-sm text-zinc-300 transition hover:bg-[#181818]"
+                  >
+                    <input
+                      type="checkbox"
+                      value={service.id}
+                      className="size-4 shrink-0 accent-[#d71920]"
+                      {...register("serviceIds")}
+                    />
+                    <span>{service.title}</span>
+                  </label>
                 ))}
-              </select>
-            </Field>
+              </div>
+              {errors.serviceIds ? (
+                <p className="mt-2 text-xs text-red-400">
+                  {errors.serviceIds.message}
+                </p>
+              ) : null}
+            </fieldset>
             <Field label="Дата" error={errors.date?.message}>
               <input
                 className={fieldClass}
@@ -165,17 +168,15 @@ export function BookingSection({
             <Field label="Время" error={errors.time?.message}>
               <select
                 className={fieldClass}
-                disabled={
-                  !selectedService || !selectedDate || availability.isPending
-                }
+                disabled={!selectedDate || availability.isPending}
                 defaultValue=""
                 {...register("time")}
               >
                 <option value="" disabled>
                   {availability.isPending
                     ? "Загружаем…"
-                    : !selectedService || !selectedDate
-                      ? "Сначала выберите услугу и дату"
+                    : !selectedDate
+                      ? "Сначала выберите дату"
                       : availability.data?.length
                         ? "Выберите свободное время"
                         : "Свободного времени нет"}
@@ -216,13 +217,13 @@ export function BookingSection({
                 disabled={mutation.isPending}
                 type="submit"
               >
-                {mutation.isPending ? "Проверяем..." : "Оставить заявку"}{" "}
+                {mutation.isPending ? "Проверяем..." : "Записаться на осмотр"}{" "}
                 <ArrowRight size={18} />
               </button>
               {mutation.isSuccess ? (
                 <p className="flex items-center gap-2 text-sm text-zinc-300">
-                  <CheckCircle2 className="text-emerald-400" size={18} /> Запись
-                  подтверждена. Менеджер получил заявку.
+                  <CheckCircle2 className="text-emerald-400" size={18} /> Осмотр
+                  подтверждён. Менеджер получил заявку.
                 </p>
               ) : null}
               {mutation.isError ? (

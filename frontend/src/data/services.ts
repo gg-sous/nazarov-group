@@ -3,7 +3,6 @@ export type Service = {
   title: string;
   description: string;
   priceFrom: string;
-  duration: string;
   marker: string;
   image_url?: string | null;
 };
@@ -16,7 +15,6 @@ export const services: Service[] = [
     description:
       "Глубокий уход за кузовом и салоном по единому технологическому процессу.",
     priceFrom: "от 25 000 ₽",
-    duration: "от 2 дней",
   },
   {
     id: "body-polishing",
@@ -25,7 +23,6 @@ export const services: Service[] = [
     description:
       "Коррекция мелких дефектов и восстановление глубины заводского цвета.",
     priceFrom: "от 15 000 ₽",
-    duration: "1–2 дня",
   },
   {
     id: "ceramic-coating",
@@ -34,7 +31,6 @@ export const services: Service[] = [
     description:
       "Защитный состав для выразительного блеска и упрощённого ухода за кузовом.",
     priceFrom: "от 18 000 ₽",
-    duration: "от 1 дня",
   },
   {
     id: "interior-cleaning",
@@ -43,7 +39,6 @@ export const services: Service[] = [
     description:
       "Деликатная очистка материалов салона с вниманием к труднодоступным зонам.",
     priceFrom: "от 12 000 ₽",
-    duration: "от 8 часов",
   },
   {
     id: "detail-wash",
@@ -52,7 +47,6 @@ export const services: Service[] = [
     description:
       "Безопасная многоэтапная мойка кузова, дисков, проёмов и внешних деталей.",
     priceFrom: "от 3 500 ₽",
-    duration: "от 2 часов",
   },
   {
     id: "protective-coatings",
@@ -60,6 +54,5 @@ export const services: Service[] = [
     title: "Защитные покрытия",
     description: "Подбор составов для кузова, стекла, дисков, кожи и текстиля.",
     priceFrom: "от 5 000 ₽",
-    duration: "от 3 часов",
   },
 ];

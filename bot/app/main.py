@@ -50,6 +50,20 @@ def _optional_text(payload: dict[str, Any], field: str, limit: int, default: str
     return value.strip()
 
 
+def _service_names(payload: dict[str, Any]) -> list[str]:
+    value = payload.get("service_names")
+    if value is None:
+        return [_required_text(payload, "service_name", 160)]
+    if (
+        not isinstance(value, list)
+        or not value
+        or len(value) > 30
+        or any(not isinstance(item, str) or not item.strip() or len(item) > 160 for item in value)
+    ):
+        raise web.HTTPBadRequest(text="Invalid service_names")
+    return [item.strip() for item in value]
+
+
 def _group_chat_id_from_env(raw_value: str) -> int | None:
     if not raw_value:
         return None
@@ -99,19 +113,18 @@ async def booking_notification(request: web.Request) -> web.Response:
     client_phone = _required_text(payload, "client_phone", 32)
     vehicle_model = _optional_text(payload, "vehicle_model", 160, "Не указано")
     vehicle_color = _optional_text(payload, "vehicle_color", 40, "Не указано")
-    service_name = _required_text(payload, "service_name", 160)
+    service_names = _service_names(payload)
     booking_date = _required_text(payload, "date", 10)
     start_time = _required_text(payload, "start_time", 5)
-    end_time = _required_text(payload, "end_time", 5)
     message = (
-        "<b>Новая запись NazarovGroup</b>\n\n"
+        "<b>Новая запись на первичный осмотр</b>\n\n"
         f"Клиент: {html.escape(client_name)}\n"
         f"Телефон: <code>{html.escape(client_phone)}</code>\n"
         f"Автомобиль: {html.escape(vehicle_model)}\n"
         f"Цвет: {html.escape(vehicle_color)}\n"
-        f"Услуга: {html.escape(service_name)}\n"
+        f"Услуги: {html.escape(', '.join(service_names))}\n"
         f"Дата: {html.escape(booking_date)}\n"
-        f"Время: {html.escape(start_time)}–{html.escape(end_time)}\n"
+        f"Время: {html.escape(start_time)}\n"
         f"ID: <code>{html.escape(booking_id)}</code>"
     )
     await bot.send_message(chat_id=chat_id, text=message, parse_mode="HTML")

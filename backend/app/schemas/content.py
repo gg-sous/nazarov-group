@@ -29,8 +29,6 @@ class ServiceContent(BaseModel):
     title: str = Field(min_length=2, max_length=160)
     description: str = Field(min_length=5, max_length=600)
     price_from: str = Field(min_length=1, max_length=80)
-    duration: str = Field(min_length=1, max_length=80)
-    duration_minutes: int = Field(default=120, ge=30, le=2_880)
     is_active: bool = True
     is_featured: bool = True
     sort_order: int = Field(default=0, ge=0, le=10_000)

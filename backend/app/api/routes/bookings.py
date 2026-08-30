@@ -19,11 +19,10 @@ _lock = asyncio.Lock()
 
 @router.get("/availability", response_model=BookingAvailabilityResponse)
 async def read_availability(
-    service_id: str,
     date: date,
     session: SessionDependency,
 ) -> BookingAvailabilityResponse:
-    slots = await get_available_slots(session, service_id=service_id, booking_date=date)
+    slots = await get_available_slots(session, booking_date=date)
     return BookingAvailabilityResponse(slots=slots)
 
 

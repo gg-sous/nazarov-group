@@ -455,7 +455,7 @@ export function AdminDashboard({
           <section id="overview" className="scroll-mt-6">
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               {[
-                ["Записи", bookings.length],
+                ["Осмотры", bookings.length],
                 ["Услуги", content.services.length],
                 ["Работы", content.portfolio.length],
                 ["Документы", content.legal.length],
@@ -474,8 +474,8 @@ export function AdminDashboard({
           <Section
             id="bookings"
             index="01 / Заявки"
-            title="Записи клиентов"
-            description="Новые заявки, контактные данные и рабочие статусы без оплаты."
+            title="Первичные осмотры"
+            description="Записи на осмотр, выбранные услуги, контактные данные и рабочие статусы."
           >
             <div className="mb-3 flex justify-end">
               <a
@@ -512,11 +512,10 @@ export function AdminDashboard({
                       </div>
                       <div>
                         <p className="text-sm text-[#ddd]">
-                          {booking.service_name}
+                          {booking.service_names.join(", ")}
                         </p>
                         <p className="mt-1 text-xs text-[#777]">
-                          {booking.date} · {booking.start_time.slice(0, 5)}–
-                          {booking.end_time.slice(0, 5)}
+                          {booking.date} · {booking.start_time.slice(0, 5)}
                         </p>
                       </div>
                       <p className="text-xs text-[#777]">
@@ -543,7 +542,7 @@ export function AdminDashboard({
                 </div>
               ) : (
                 <p className="p-8 text-center text-sm text-[#777]">
-                  Записей пока нет.
+                  Записей на осмотр пока нет.
                 </p>
               )}
             </div>
@@ -637,7 +636,7 @@ export function AdminDashboard({
             id="services"
             index="02 / Каталог"
             title="Услуги"
-            description="Редактируйте карточки, цены, сроки и видимость."
+            description="Редактируйте карточки, цены, изображения и видимость."
           >
             <div
               className={`space-y-3 ${content.services.length > 5 ? "max-h-[980px] overflow-y-auto overscroll-contain pr-2" : ""}`}
@@ -741,35 +740,12 @@ export function AdminDashboard({
                         }
                       />
                     </Field>
-                    <Field label="Срок">
-                      <input
-                        className={inputClass}
-                        value={service.duration}
-                        onChange={(e) =>
-                          updateService(index, { duration: e.target.value })
-                        }
-                      />
-                    </Field>
                     <Field label="Маркер">
                       <input
                         className={inputClass}
                         value={service.marker}
                         onChange={(e) =>
                           updateService(index, { marker: e.target.value })
-                        }
-                      />
-                    </Field>
-                    <Field label="Длительность, минут">
-                      <input
-                        className={inputClass}
-                        type="number"
-                        min={30}
-                        max={2880}
-                        value={service.duration_minutes}
-                        onChange={(e) =>
-                          updateService(index, {
-                            duration_minutes: Number(e.target.value),
-                          })
                         }
                       />
                     </Field>
@@ -815,8 +791,6 @@ export function AdminDashboard({
                       title: "Новая услуга",
                       description: "Добавьте описание новой услуги",
                       price_from: "от 0 ₽",
-                      duration: "уточняется",
-                      duration_minutes: 120,
                       is_active: false,
                       is_featured: false,
                       sort_order: (current.services.length + 1) * 10,

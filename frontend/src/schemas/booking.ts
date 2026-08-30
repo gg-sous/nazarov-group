@@ -24,7 +24,14 @@ export const bookingSchema = z.object({
       (value) => vehicleColors.some((color) => color === value),
       "Выберите цвет из списка",
     ),
-  serviceId: z.string().min(1, "Выберите услугу"),
+  serviceIds: z
+    .array(z.string())
+    .min(1, "Выберите хотя бы одну услугу")
+    .max(30, "Выбрано слишком много услуг")
+    .refine(
+      (values) => values.length === new Set(values).size,
+      "Услуги не должны повторяться",
+    ),
   date: z.string().min(1, "Выберите дату"),
   time: z.string().min(1, "Выберите время"),
   personalDataConsent: z

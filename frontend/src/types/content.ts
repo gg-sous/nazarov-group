@@ -13,8 +13,6 @@ export type ServiceContent = {
   title: string;
   description: string;
   price_from: string;
-  duration: string;
-  duration_minutes: number;
   is_active: boolean;
   is_featured: boolean;
   sort_order: number;
@@ -55,11 +53,10 @@ export type BookingStatus =
 export type AdminBooking = {
   id: string;
   status: BookingStatus;
-  service_name: string;
-  service_slug: string;
+  service_names: string[];
+  service_slugs: string[];
   date: string;
   start_time: string;
-  end_time: string;
   client_name: string;
   client_phone: string;
   vehicle_model: string;

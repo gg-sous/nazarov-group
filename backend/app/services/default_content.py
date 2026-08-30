@@ -10,7 +10,7 @@ DEFAULT_SITE_CONTENT = SiteContentBundle.model_validate(
                 "Возвращаем автомобилю выразительность и защищаем результат — аккуратно, "
                 "технологично, с вниманием к каждой поверхности."
             ),
-            "primary_button": "Записаться",
+            "primary_button": "Записаться на осмотр",
             "secondary_button": "Наши работы",
             "image_url": "/og.png",
         },
@@ -23,8 +23,6 @@ DEFAULT_SITE_CONTENT = SiteContentBundle.model_validate(
                     "Глубокий уход за кузовом и салоном по единому технологическому процессу."
                 ),
                 "price_from": "от 25 000 ₽",
-                "duration": "от 2 дней",
-                "duration_minutes": 600,
                 "is_active": True,
                 "is_featured": True,
                 "sort_order": 10,
@@ -37,8 +35,6 @@ DEFAULT_SITE_CONTENT = SiteContentBundle.model_validate(
                     "Коррекция мелких дефектов и восстановление глубины заводского цвета."
                 ),
                 "price_from": "от 15 000 ₽",
-                "duration": "1–2 дня",
-                "duration_minutes": 600,
                 "is_active": True,
                 "is_featured": True,
                 "sort_order": 20,
@@ -51,8 +47,6 @@ DEFAULT_SITE_CONTENT = SiteContentBundle.model_validate(
                     "Защитный состав для выразительного блеска и упрощённого ухода за кузовом."
                 ),
                 "price_from": "от 18 000 ₽",
-                "duration": "от 1 дня",
-                "duration_minutes": 480,
                 "is_active": True,
                 "is_featured": True,
                 "sort_order": 30,
@@ -65,8 +59,6 @@ DEFAULT_SITE_CONTENT = SiteContentBundle.model_validate(
                     "Деликатная очистка материалов салона с вниманием к труднодоступным зонам."
                 ),
                 "price_from": "от 12 000 ₽",
-                "duration": "от 8 часов",
-                "duration_minutes": 480,
                 "is_active": True,
                 "is_featured": True,
                 "sort_order": 40,
@@ -79,8 +71,6 @@ DEFAULT_SITE_CONTENT = SiteContentBundle.model_validate(
                     "Безопасная многоэтапная мойка кузова, дисков, проёмов и внешних деталей."
                 ),
                 "price_from": "от 3 500 ₽",
-                "duration": "от 2 часов",
-                "duration_minutes": 120,
                 "is_active": True,
                 "is_featured": True,
                 "sort_order": 50,
@@ -91,8 +81,6 @@ DEFAULT_SITE_CONTENT = SiteContentBundle.model_validate(
                 "title": "Защитные покрытия",
                 "description": "Подбор составов для кузова, стекла, дисков, кожи и текстиля.",
                 "price_from": "от 5 000 ₽",
-                "duration": "от 3 часов",
-                "duration_minutes": 180,
                 "is_active": True,
                 "is_featured": True,
                 "sort_order": 60,

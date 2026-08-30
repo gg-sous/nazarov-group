@@ -1,3 +1,4 @@
+import re
 from datetime import date as Date
 from datetime import datetime
 from datetime import time as Time
@@ -32,10 +33,19 @@ class BookingCreate(BaseModel):
     client_phone: str = Field(min_length=10, max_length=32, pattern=r"^[+\d\s()\-]+$")
     vehicle_model: str = Field(min_length=2, max_length=160)
     vehicle_color: VehicleColor
-    service_id: str = Field(pattern=r"^[a-z0-9-]{2,80}$")
+    service_ids: list[str] = Field(min_length=1, max_length=30)
     date: Date
     start_time: Time
     personal_data_consent: bool
+
+    @field_validator("service_ids")
+    @classmethod
+    def validate_service_ids(cls, value: list[str]) -> list[str]:
+        if any(not re.fullmatch(r"[a-z0-9-]{2,80}", item) for item in value):
+            raise ValueError("Invalid service identifier")
+        if len(value) != len(set(value)):
+            raise ValueError("Services must be unique")
+        return value
 
     @field_validator("date")
     @classmethod
@@ -57,18 +67,17 @@ class BookingResponse(BaseModel):
 
     id: UUID
     status: BookingStatus
-    service_name: str
+    service_names: list[str]
     vehicle_model: str
     vehicle_color: str
     date: Date
     start_time: Time
-    end_time: Time
 
 
 class AdminBookingResponse(BookingResponse):
     client_name: str
     client_phone: str
-    service_slug: str
+    service_slugs: list[str]
     created_at: datetime
 
 

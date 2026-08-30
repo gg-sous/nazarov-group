@@ -146,13 +146,13 @@ async def export_bookings(
 ) -> Response:
     bookings = await list_all_bookings(session)
     workbook = await asyncio.to_thread(build_booking_workbook, bookings)
-    filename = "Статистика-заказов-NazarovGroup.xlsx"
+    filename = "Статистика-первичных-осмотров-NazarovGroup.xlsx"
     return Response(
         content=workbook,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={
             "Content-Disposition": (
-                f"attachment; filename=bookings-nazarovgroup.xlsx; filename*=UTF-8''{quote(filename)}"
+                f"attachment; filename=inspections-nazarovgroup.xlsx; filename*=UTF-8''{quote(filename)}"
             ),
             "Cache-Control": "no-store",
             "X-Content-Type-Options": "nosniff",

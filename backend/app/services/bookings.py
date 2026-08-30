@@ -1,4 +1,4 @@
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, datetime, time, timedelta
 from uuid import UUID
 from zoneinfo import ZoneInfo
 
@@ -22,14 +22,27 @@ def _normalize_phone(value: str) -> str:
     return f"+{digits}"
 
 
+def _build_hourly_slots(
+    opening: datetime,
+    closing: datetime,
+    now: datetime,
+    booked_times: set[time],
+) -> list[str]:
+    slots: list[str] = []
+    candidate = opening
+    while candidate < closing:
+        if candidate > now + timedelta(minutes=15) and candidate.time() not in booked_times:
+            slots.append(candidate.strftime("%H:%M"))
+        candidate += timedelta(hours=1)
+    return slots
+
+
 async def create_booking(session: AsyncSession, payload: BookingCreate) -> Booking:
     content = await get_site_content(session)
-    service = next(
-        (item for item in content.services if item.id == payload.service_id and item.is_active),
-        None,
-    )
-    if service is None:
+    active_services = {item.id: item for item in content.services if item.is_active}
+    if any(service_id not in active_services for service_id in payload.service_ids):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Service is unavailable")
+    selected_services = [active_services[service_id] for service_id in payload.service_ids]
 
     timezone = ZoneInfo(settings.business_timezone)
     starts_at = datetime.combine(payload.date, payload.start_time, tzinfo=timezone)
@@ -43,18 +56,17 @@ async def create_booking(session: AsyncSession, payload: BookingCreate) -> Booki
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Bookings are available up to 180 days ahead",
         )
-    ends_at = starts_at + timedelta(minutes=service.duration_minutes)
     open_time = datetime.strptime(settings.booking_open_time, "%H:%M").time()
     close_time = datetime.strptime(settings.booking_close_time, "%H:%M").time()
-    if starts_at.time() < open_time or ends_at.time() > close_time:
+    if payload.start_time.minute != 0 or payload.start_time.second != 0:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Choose a whole-hour time",
+        )
+    if starts_at.time() < open_time or starts_at.time() >= close_time:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Selected time is outside booking hours",
-        )
-    if ends_at.date() != starts_at.date():
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Selected service does not fit into this day",
         )
 
     await session.execute(
@@ -65,8 +77,7 @@ async def create_booking(session: AsyncSession, payload: BookingCreate) -> Booki
         select(Booking.id).where(
             Booking.date == payload.date,
             Booking.status.in_(ACTIVE_BOOKING_STATUSES),
-            Booking.start_time < ends_at.time(),
-            Booking.end_time > starts_at.time(),
+            Booking.start_time == starts_at.time(),
         )
     )
     if overlap is not None:
@@ -77,12 +88,10 @@ async def create_booking(session: AsyncSession, payload: BookingCreate) -> Booki
         client_phone=_normalize_phone(payload.client_phone),
         vehicle_model=payload.vehicle_model,
         vehicle_color=payload.vehicle_color,
-        service_id=None,
-        service_slug=service.id,
-        service_name=service.title,
+        service_slugs=[service.id for service in selected_services],
+        service_names=[service.title for service in selected_services],
         date=payload.date,
         start_time=starts_at.time().replace(tzinfo=None),
-        end_time=ends_at.time().replace(tzinfo=None),
         status=BookingStatus.CONFIRMED,
     )
     session.add(booking)
@@ -96,10 +105,9 @@ async def create_booking(session: AsyncSession, payload: BookingCreate) -> Booki
                 "client_phone": booking.client_phone,
                 "vehicle_model": booking.vehicle_model,
                 "vehicle_color": booking.vehicle_color,
-                "service_name": booking.service_name,
+                "service_names": booking.service_names,
                 "date": booking.date.isoformat(),
                 "start_time": booking.start_time.strftime("%H:%M"),
-                "end_time": booking.end_time.strftime("%H:%M"),
             },
             status="pending",
             attempts=0,
@@ -114,16 +122,8 @@ async def create_booking(session: AsyncSession, payload: BookingCreate) -> Booki
 async def get_available_slots(
     session: AsyncSession,
     *,
-    service_id: str,
     booking_date: date,
 ) -> list[str]:
-    content = await get_site_content(session)
-    service = next(
-        (item for item in content.services if item.id == service_id and item.is_active),
-        None,
-    )
-    if service is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Service is unavailable")
     timezone = ZoneInfo(settings.business_timezone)
     now = datetime.now(timezone)
     if booking_date < now.date() or booking_date > now.date() + timedelta(days=180):
@@ -148,18 +148,12 @@ async def get_available_slots(
             )
         ).all()
     )
-    slots: list[str] = []
-    candidate = opening
-    while candidate + timedelta(minutes=service.duration_minutes) <= closing:
-        candidate_end = candidate + timedelta(minutes=service.duration_minutes)
-        overlaps = any(
-            item.start_time < candidate_end.time() and item.end_time > candidate.time()
-            for item in existing
-        )
-        if candidate > now + timedelta(minutes=15) and not overlaps:
-            slots.append(candidate.strftime("%H:%M"))
-        candidate += timedelta(minutes=30)
-    return slots
+    return _build_hourly_slots(
+        opening,
+        closing,
+        now,
+        {item.start_time for item in existing},
+    )
 
 
 def booking_list_query() -> Select[tuple[Booking]]:
@@ -184,6 +178,24 @@ async def update_booking_status(
     booking = await session.get(Booking, booking_id)
     if booking is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
+    if payload.status in ACTIVE_BOOKING_STATUSES and booking.status not in ACTIVE_BOOKING_STATUSES:
+        await session.execute(
+            text("SELECT pg_advisory_xact_lock(hashtext(:booking_date))"),
+            {"booking_date": booking.date.isoformat()},
+        )
+        conflict = await session.scalar(
+            select(Booking.id).where(
+                Booking.id != booking.id,
+                Booking.date == booking.date,
+                Booking.start_time == booking.start_time,
+                Booking.status.in_(ACTIVE_BOOKING_STATUSES),
+            )
+        )
+        if conflict is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="This time is already booked",
+            )
     booking.status = payload.status
     await session.commit()
     await session.refresh(booking)

@@ -5,12 +5,11 @@ const apiUrl = (process.env.NEXT_PUBLIC_API_URL ?? "/api").replace(/\/$/, "");
 export type BookingResponse = {
   id: string;
   status: "confirmed";
-  service_name: string;
+  service_names: string[];
   vehicle_model: string;
   vehicle_color: string;
   date: string;
   start_time: string;
-  end_time: string;
 };
 
 export async function createBooking(
@@ -24,7 +23,7 @@ export async function createBooking(
       client_phone: values.clientPhone,
       vehicle_model: values.vehicleModel,
       vehicle_color: values.vehicleColor,
-      service_id: values.serviceId,
+      service_ids: values.serviceIds,
       date: values.date,
       start_time: values.time,
       personal_data_consent: values.personalDataConsent,
@@ -48,11 +47,8 @@ export async function createBooking(
   return (await response.json()) as BookingResponse;
 }
 
-export async function getBookingAvailability(
-  serviceId: string,
-  date: string,
-): Promise<string[]> {
-  const params = new URLSearchParams({ service_id: serviceId, date });
+export async function getBookingAvailability(date: string): Promise<string[]> {
+  const params = new URLSearchParams({ date });
   const response = await fetch(
     `${apiUrl}/bookings/availability?${params.toString()}`,
   );
