@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 from aiogram import Bot, Dispatcher, Router
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.enums import ChatType
 from aiogram.filters import CommandStart
 from aiogram.types import Message
@@ -136,9 +137,11 @@ async def main() -> None:
     )
     token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
     chat_id = _group_chat_id_from_env(os.getenv("TELEGRAM_GROUP_CHAT_ID", "").strip())
+    proxy_url = os.getenv("TELEGRAM_PROXY_URL", "").strip()
     internal_secret = os.getenv("BOT_INTERNAL_SECRET", "").strip()
     health_port = int(os.getenv("BOT_HEALTH_PORT", "8081"))
-    bot = Bot(token=token) if token else None
+    telegram_session = AiohttpSession(proxy=proxy_url) if proxy_url else None
+    bot = Bot(token=token, session=telegram_session) if token else None
     polling_task: asyncio.Task[None] | None = None
     if bot is None or chat_id is None:
         LOGGER.warning(
@@ -152,9 +155,15 @@ async def main() -> None:
             polling_task = asyncio.create_task(
                 dispatcher.start_polling(bot, close_bot_session=False)
             )
-            LOGGER.info("Telegram polling started; send /start in the target group to obtain its ID")
+            LOGGER.info(
+                "Telegram polling started%s; send /start in the target group to obtain its ID",
+                " through configured proxy" if proxy_url else "",
+            )
         async with notification_server(health_port, bot, chat_id, internal_secret):
-            await asyncio.Event().wait()
+            if polling_task is None:
+                await asyncio.Event().wait()
+            await polling_task
+            raise RuntimeError("Telegram polling stopped unexpectedly")
     finally:
         if polling_task is not None:
             polling_task.cancel()

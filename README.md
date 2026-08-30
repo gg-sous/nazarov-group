@@ -116,6 +116,7 @@ Volume `media_data` необходимо включить в резервное 
 | `NEXT_PUBLIC_SITE_URL` | Canonical origin для sitemap/metadata |
 | `TELEGRAM_BOT_TOKEN` | Token от BotFather; пустое значение включает health-only режим |
 | `TELEGRAM_GROUP_CHAT_ID` | Отрицательный ID рабочей Telegram-группы; личные chat ID отклоняются |
+| `TELEGRAM_PROXY_URL` | Необязательный SOCKS5/HTTP proxy для исходящих запросов к Telegram API |
 | `BOT_INTERNAL_SECRET` | Секрет backend → bot, минимум 32 случайных символа в production |
 | `BUSINESS_TIMEZONE` | Часовой пояс расписания, например `Asia/Yekaterinburg` |
 | `BOOKING_OPEN_TIME`, `BOOKING_CLOSE_TIME` | Рабочее окно в формате `HH:MM` |
@@ -219,6 +220,8 @@ Health endpoint: `GET :8081/health` внутри Docker-сети. Уведомл
 7. Проверьте `docker compose logs --tail=100 bot backend`. Новая тестовая запись с сайта должна один раз появиться в группе.
 
 Если `/start` отправить боту лично, он не выдаст личный chat ID и предложит перейти в группу. Не публикуйте `.env` и token, не добавляйте их в Git и не присылайте в переписку. После новой записи бот получает только необходимые для обработки заявки поля. Если Telegram временно недоступен, backend хранит событие в PostgreSQL outbox и повторяет доставку с увеличивающейся задержкой. При преобразовании обычной группы в супергруппу Telegram может изменить ID; тогда повторите `/start` в группе и обновите `TELEGRAM_GROUP_CHAT_ID`.
+
+Если `api.telegram.org:443` недоступен из сети VDS, укажите в production `.env` защищённый proxy, например `TELEGRAM_PROXY_URL=socks5://user:password@proxy-host:port`. Поддерживаются HTTP tunneling, SOCKS4(a) и SOCKS5. Не используйте публичные бесплатные proxy: адрес и credentials должны храниться только в `.env` с правами `600`. После изменения переменной пересоздайте bot-контейнер или повторно запустите deployment; обычный restart не перечитывает environment.
 
 ## CI/CD
 
