@@ -161,13 +161,23 @@ export function AdminDashboard({
 
   useEffect(() => {
     if (window.innerWidth >= 1024) return;
-    const activeLink = mobileNavigationRef.current?.querySelector<HTMLElement>(
+    const navigation = mobileNavigationRef.current;
+    const activeLink = navigation?.querySelector<HTMLElement>(
       `[data-admin-section="${activeSection}"]`,
     );
-    activeLink?.scrollIntoView({
+    if (!navigation || !activeLink) return;
+
+    const navigationRect = navigation.getBoundingClientRect();
+    const activeLinkRect = activeLink.getBoundingClientRect();
+    const targetLeft =
+      navigation.scrollLeft +
+      activeLinkRect.left -
+      navigationRect.left -
+      (navigationRect.width - activeLinkRect.width) / 2;
+
+    navigation.scrollTo({
+      left: Math.max(0, targetLeft),
       behavior: "smooth",
-      block: "nearest",
-      inline: "center",
     });
   }, [activeSection]);
 
