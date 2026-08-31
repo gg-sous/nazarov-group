@@ -64,7 +64,7 @@ export function SiteFooter({ contacts }: { contacts: ContactsContent }) {
           <p>
             Разработано командой{" "}
             <a
-              className="text-zinc-400 transition-colors hover:text-white"
+              className="text-zinc-400 transition-colors hover:text-white underline"
               href="https://t.me/nexum_labs_channel"
               target="_blank"
               rel="noreferrer"
