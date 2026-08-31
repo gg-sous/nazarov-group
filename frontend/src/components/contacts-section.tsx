@@ -4,6 +4,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import type { ContactsContent } from "@/types/content";
 
 export function ContactsSection({ contacts }: { contacts: ContactsContent }) {
+  const mapUrl = `https://yandex.ru/map-widget/v1/?mode=search&text=${encodeURIComponent(contacts.address)}&z=16`;
   const contactItems = [
     {
       label: "Телефон",
@@ -20,7 +21,7 @@ export function ContactsSection({ contacts }: { contacts: ContactsContent }) {
         <SectionHeading
           eyebrow="Контакты"
           title="Свяжитесь удобным способом"
-          description="Фактические адрес, телефон и ссылки на социальные сети вынесены в единый конфигурационный файл и будут заменены перед запуском."
+          description="Здесь собраны адрес, график работы и удобные способы связи."
         />
         <div className="grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
           <div className="border border-white/10 bg-[#111] p-5 sm:p-9">
@@ -69,16 +70,13 @@ export function ContactsSection({ contacts }: { contacts: ContactsContent }) {
             </div>
           </div>
           <div className="relative min-h-80 overflow-hidden border border-white/10 bg-[#141414] sm:min-h-96">
-            <div className="map-grid absolute inset-0 opacity-40" />
-            <div className="absolute top-[46%] left-[58%] size-5 rounded-full bg-[#d71920] shadow-[0_0_0_10px_rgba(215,25,32,.14)]" />
-            <div className="absolute right-6 bottom-6 left-6 border border-white/10 bg-[#090909]/90 p-5 backdrop-blur">
-              <p className="text-xs tracking-[0.2em] text-zinc-600 uppercase">
-                Карта
-              </p>
-              <p className="mt-2 text-sm text-zinc-300">
-                Интерактивная карта будет подключена после подтверждения адреса.
-              </p>
-            </div>
+            <iframe
+              className="absolute inset-0 h-full w-full border-0"
+              src={mapUrl}
+              title={`Яндекс Карта: ${contacts.address}`}
+              loading="lazy"
+              allowFullScreen
+            />
           </div>
         </div>
       </Container>
