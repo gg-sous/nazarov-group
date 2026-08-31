@@ -61,6 +61,17 @@ export function SiteFooter({ contacts }: { contacts: ContactsContent }) {
         <div className="mt-14 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs text-zinc-600 sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} NazarovGroup</p>
           <p>Информация на сайте не является публичной офертой.</p>
+          <p>
+            Разработано командой{" "}
+            <a
+              className="text-zinc-400 transition-colors hover:text-white"
+              href="https://t.me/nexum_labs_channel"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Nexum Labs
+            </a>
+          </p>
         </div>
       </Container>
     </footer>
