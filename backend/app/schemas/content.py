@@ -4,6 +4,13 @@ from typing import Literal
 from pydantic import BaseModel, Field, HttpUrl, field_validator
 
 MEDIA_URL_PATTERN = r"^/media/[A-Za-z0-9_-]{12,100}(?:/(?:640|1280|1920)\.webp|\.(?:jpe?g|png|webp))$"
+DEFAULT_2GIS_MAP_URL = (
+    "https://makemap.2gis.ru/widget?data="
+    "eJw1js1OxDAMhN_FXKuqaZs22wdYBKc9IH61h7IxEJHWUeoFStV3x5sKn6yZ8fhbgKLFiPYaaUCODifo"
+    "XhbgOSB0sMeezxEhgxApYOTki-3YX_y7Yd88Pd5-2U87v1b33xK0OJ2iC-xolIAIJ_IUZb0qSqPeSlF"
+    "-b0aLP9Cp4n_WDN43gDnVb98P5EZODQLpxp4TnG7ywujS1Jmuc1O2eneUc2eh041ZjxkMfTjQ5DaCB"
+    "XzPYtV5W2lVtRn4i6x1vtOmbZTQEA3CoqREyMn7hw9E_5xUjmdc_wDRWVty"
+)
 
 
 class HeroContent(BaseModel):
@@ -62,10 +69,21 @@ class ContactsContent(BaseModel):
     phone: str = Field(min_length=5, max_length=40)
     phone_href: str = Field(pattern=r"^tel:\+?[0-9]+$")
     address: str = Field(min_length=3, max_length=300)
+    map_url: HttpUrl = Field(
+        default=DEFAULT_2GIS_MAP_URL,
+        validate_default=True,
+    )
     schedule: str = Field(min_length=3, max_length=200)
     telegram: HttpUrl
     vk: HttpUrl
     email: str = Field(min_length=5, max_length=200)
+
+    @field_validator("map_url")
+    @classmethod
+    def validate_map_url(cls, value: HttpUrl) -> HttpUrl:
+        if value.host != "makemap.2gis.ru" or value.path != "/widget" or "data=" not in str(value):
+            raise ValueError("Only 2GIS map widget links can be used")
+        return value
 
 
 class LegalContent(BaseModel):

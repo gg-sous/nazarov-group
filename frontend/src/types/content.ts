@@ -30,6 +30,7 @@ export type ContactsContent = {
   phone: string;
   phone_href: string;
   address: string;
+  map_url: string;
   schedule: string;
   telegram: string;
   vk: string;

@@ -1,4 +1,4 @@
-from app.schemas.content import SiteContentBundle
+from app.schemas.content import DEFAULT_2GIS_MAP_URL, SiteContentBundle
 
 DEFAULT_SITE_CONTENT = SiteContentBundle.model_validate(
     {
@@ -116,6 +116,7 @@ DEFAULT_SITE_CONTENT = SiteContentBundle.model_validate(
             "phone": "+7 (000) 000-00-00",
             "phone_href": "tel:+70000000000",
             "address": "Адрес будет указан перед открытием записи",
+            "map_url": DEFAULT_2GIS_MAP_URL,
             "schedule": "Ежедневно, по предварительной записи",
             "telegram": "https://t.me/",
             "vk": "https://vk.com/",

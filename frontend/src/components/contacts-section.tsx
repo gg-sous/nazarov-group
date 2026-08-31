@@ -4,7 +4,6 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import type { ContactsContent } from "@/types/content";
 
 export function ContactsSection({ contacts }: { contacts: ContactsContent }) {
-  const mapUrl = `https://yandex.ru/map-widget/v1/?mode=search&text=${encodeURIComponent(contacts.address)}&z=16`;
   const contactItems = [
     {
       label: "Телефон",
@@ -72,10 +71,11 @@ export function ContactsSection({ contacts }: { contacts: ContactsContent }) {
           <div className="relative min-h-80 overflow-hidden border border-white/10 bg-[#141414] sm:min-h-96">
             <iframe
               className="absolute inset-0 h-full w-full border-0"
-              src={mapUrl}
-              title={`Яндекс Карта: ${contacts.address}`}
+              src={contacts.map_url}
+              title={`2ГИС: ${contacts.address}`}
               loading="lazy"
               allowFullScreen
+              sandbox="allow-modals allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation-by-user-activation"
             />
           </div>
         </div>
