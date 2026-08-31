@@ -1,6 +1,7 @@
 import { Clock3, MapPin, MessageCircle, Phone } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { NAZAROVGROUP_MAP_URL } from "@/data/map";
 import type { ContactsContent } from "@/types/content";
 
 export function ContactsSection({ contacts }: { contacts: ContactsContent }) {
@@ -71,9 +72,9 @@ export function ContactsSection({ contacts }: { contacts: ContactsContent }) {
           <div className="relative min-h-80 overflow-hidden border border-white/10 bg-[#141414] sm:min-h-96">
             <iframe
               className="absolute inset-0 h-full w-full border-0"
-              src={contacts.map_url}
+              src={NAZAROVGROUP_MAP_URL}
               title={`2ГИС: ${contacts.address}`}
-              loading="lazy"
+              loading="eager"
               allowFullScreen
               sandbox="allow-modals allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation-by-user-activation"
             />

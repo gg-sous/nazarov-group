@@ -1,6 +1,7 @@
 import { portfolioItems } from "@/data/portfolio";
 import { services } from "@/data/services";
 import { legalLinks, siteConfig } from "@/data/site";
+import { NAZAROVGROUP_MAP_URL } from "@/data/map";
 import type { SiteContentBundle } from "@/types/content";
 
 export const defaultSiteContent: SiteContentBundle = {
@@ -30,8 +31,7 @@ export const defaultSiteContent: SiteContentBundle = {
     phone: siteConfig.phone,
     phone_href: siteConfig.phoneHref,
     address: siteConfig.address,
-    map_url:
-      "https://makemap.2gis.ru/widget?data=eJxFjs1OwzAQhN9luFpVkrZJ8AMUwakHxK96CPECFk7W2myBNPK7oyYC9jgz-vabwOJIyF0Rd6TiaYB9nqBjJFjsqNGjEAyicCTRuZ-gXsO5v-125ePDzaf7cOPL-u4LBo6GVnxUzz0sYNByYIHFRVbU-WsBg9N17-gbNs9-Lxm8LQLjjF--79n3OhNYnO8bneW25Sqr13lVme1mVRfVZVEdkoF3sOUmSweDrol7HvyiMCE0Cvu3NQjn-J-CE3MHm1fJYGiFQ7h_JwpPc6pypPQDILZbog",
+    map_url: NAZAROVGROUP_MAP_URL,
     schedule: siteConfig.schedule,
     telegram: siteConfig.telegram,
     vk: siteConfig.vk,

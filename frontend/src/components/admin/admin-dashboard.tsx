@@ -943,17 +943,12 @@ export function AdminDashboard({
                   ["phone_href", "Ссылка телефона"],
                   ["email", "Email"],
                   ["address", "Адрес"],
-                  ["map_url", "Ссылка виджета 2ГИС"],
                   ["schedule", "График"],
                   ["telegram", "Telegram"],
                   ["vk", "VK"],
                 ] as [keyof ContactsContent, string][]
               ).map(([field, label]) => (
-                <Field
-                  key={field}
-                  label={label}
-                  wide={field === "address" || field === "map_url"}
-                >
+                <Field key={field} label={label} wide={field === "address"}>
                   <input
                     className={inputClass}
                     value={content.contacts[field]}

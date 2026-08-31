@@ -1,0 +1,2 @@
+export const NAZAROVGROUP_MAP_URL =
+  "https://makemap.2gis.ru/widget?data=eJxFjktug0AQRO9S2Y4swDbgOYCjeOVFlK-8IEw7GXmgUdNOghF3jzwoSS-rSq_fCBZHQu6WuCEVTz3s6wgdOoLFlio9C8GgE-5INPYj1Gu49vfNNn9-2n26kxvelg9fMHDU1-I79dzCAgY1BxZY3CRZmR4zGFzuWkffsGnye5PB-ywwRPz8fc--1Uhgcb6tNMqt80VSLtOiMOvVosyKTVYcJgPvYPNVMh0Mmqrbc-9nhRGhUti_rUG4xv8UXJgb2HQzGfS1cAiPH0ThJaYqZ5p-ACDqW6Q";
