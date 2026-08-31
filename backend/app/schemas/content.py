@@ -6,10 +6,10 @@ from pydantic import BaseModel, Field, HttpUrl, field_validator
 MEDIA_URL_PATTERN = r"^/media/[A-Za-z0-9_-]{12,100}(?:/(?:640|1280|1920)\.webp|\.(?:jpe?g|png|webp))$"
 DEFAULT_2GIS_MAP_URL = (
     "https://makemap.2gis.ru/widget?data="
-    "eJw1js1OxDAMhN_FXKuqaZs22wdYBKc9IH61h7IxEJHWUeoFStV3x5sKn6yZ8fhbgKLFiPYaaUCODifo"
-    "XhbgOSB0sMeezxEhgxApYOTki-3YX_y7Yd88Pd5-2U87v1b33xK0OJ2iC-xolIAIJ_IUZb0qSqPeSlF"
-    "-b0aLP9Cp4n_WDN43gDnVb98P5EZODQLpxp4TnG7ywujS1Jmuc1O2eneUc2eh041ZjxkMfTjQ5DaCB"
-    "XzPYtV5W2lVtRn4i6x1vtOmbZTQEA3CoqREyMn7hw9E_5xUjmdc_wDRWVty"
+    "eJw1j81ugzAQhN9le0WRMTZgHiBVesqh6q9yoPGmsWpYZJy2BPHu3Rh1T9bM7OznGShYDGjvkTqMwe"
+    "EIzfsMcRoQGthiGy8BIYMh0IAhJp9tF_3Nf-y25evLw7f9stNH8fTDQYvjMbghOuo5wMKRPAV-3glZ5"
+    "yfJynXXW_yFJhf_s2TwuQJMqX69vifXx9TAkK5vY4LT5UbUWhiTabWpZaVrdeB9Z6EplVgOGXTtsKf"
+    "RrQgz-DZCk7JlrkWujDamrsoM_M1PdYUshKmkNEIoNq5EHeNVXMufIe-fz4j-LakxXHD5A1QQX1A"
 )
 
 

@@ -31,7 +31,7 @@ export const defaultSiteContent: SiteContentBundle = {
     phone_href: siteConfig.phoneHref,
     address: siteConfig.address,
     map_url:
-      "https://makemap.2gis.ru/widget?data=eJw1js1OxDAMhN_FXKuqaZs22wdYBKc9IH61h7IxEJHWUeoFStV3x5sKn6yZ8fhbgKLFiPYaaUCODifoXhbgOSB0sMeezxEhgxApYOTki-3YX_y7Yd88Pd5-2U87v1b33xK0OJ2iC-xolIAIJ_IUZb0qSqPeSlF-b0aLP9Cp4n_WDN43gDnVb98P5EZODQLpxp4TnG7ywujS1Jmuc1O2eneUc2eh041ZjxkMfTjQ5DaCBXzPYtV5W2lVtRn4i6x1vtOmbZTQEA3CoqREyMn7hw9E_5xUjmdc_wDRWVty",
+      "https://makemap.2gis.ru/widget?data=eJw1j81ugzAQhN9le0WRMTZgHiBVesqh6q9yoPGmsWpYZJy2BPHu3Rh1T9bM7OznGShYDGjvkTqMweEIzfsMcRoQGthiGy8BIYMh0IAhJp9tF_3Nf-y25evLw7f9stNH8fTDQYvjMbghOuo5wMKRPAV-3glZ5yfJynXXW_yFJhf_s2TwuQJMqX69vifXx9TAkK5vY4LT5UbUWhiTabWpZaVrdeB9Z6EplVgOGXTtsKfRrQgz-DZCk7JlrkWujDamrsoM_M1PdYUshKmkNEIoNq5EHeNVXMufIe-fz4j-LakxXHD5A1QQX1A",
     schedule: siteConfig.schedule,
     telegram: siteConfig.telegram,
     vk: siteConfig.vk,
