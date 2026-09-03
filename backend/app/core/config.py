@@ -34,14 +34,22 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def validate_production_security(self) -> "Settings":
         if self.environment.lower() == "production":
+            if "change_me" in self.database_url:
+                raise ValueError("DATABASE_URL must not use the default password in production")
             if self.jwt_secret == "change_me_in_environment" or len(self.jwt_secret) < 32:
                 raise ValueError("JWT_SECRET must be a strong secret in production")
+            if self.admin_password:
+                raise ValueError("ADMIN_PASSWORD must be empty in production; use ADMIN_PASSWORD_HASH")
             if not self.admin_password_hash:
                 raise ValueError("ADMIN_PASSWORD_HASH is required in production")
             if not self.admin_cookie_secure:
                 raise ValueError("ADMIN_COOKIE_SECURE must be true in production")
             if len(self.bot_internal_secret) < 32:
                 raise ValueError("BOT_INTERNAL_SECRET must be set in production")
+            if any(
+                "localhost" in origin or "127.0.0.1" in origin for origin in self.cors_origins
+            ):
+                raise ValueError("CORS_ORIGINS must not contain localhost in production")
         return self
 
 

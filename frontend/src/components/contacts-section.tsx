@@ -5,6 +5,18 @@ import { NAZAROVGROUP_MAP_URL } from "@/data/map";
 import type { ContactsContent } from "@/types/content";
 
 export function ContactsSection({ contacts }: { contacts: ContactsContent }) {
+  const socialLinks = [
+    {
+      label: "Telegram",
+      href: contacts.telegram,
+      isConfigured: contacts.telegram !== "https://t.me/",
+    },
+    {
+      label: "VK",
+      href: contacts.vk,
+      isConfigured: contacts.vk !== "https://vk.com/",
+    },
+  ].filter((item) => item.isConfigured);
   const contactItems = [
     {
       label: "Телефон",
@@ -50,24 +62,24 @@ export function ContactsSection({ contacts }: { contacts: ContactsContent }) {
                 </div>
               </div>
             ))}
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-3 text-sm transition hover:border-white/40"
-                href={contacts.telegram}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <MessageCircle size={16} /> Telegram
-              </a>
-              <a
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-3 text-sm transition hover:border-white/40"
-                href={contacts.vk}
-                target="_blank"
-                rel="noreferrer"
-              >
-                VK
-              </a>
-            </div>
+            {socialLinks.length ? (
+              <div className="mt-8 flex flex-wrap gap-3">
+                {socialLinks.map((item) => (
+                  <a
+                    className="inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-3 text-sm transition hover:border-white/40"
+                    href={item.href}
+                    key={item.label}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {item.label === "Telegram" ? (
+                      <MessageCircle size={16} />
+                    ) : null}
+                    {item.label}
+                  </a>
+                ))}
+              </div>
+            ) : null}
           </div>
           <div className="relative min-h-80 overflow-hidden border border-white/10 bg-[#141414] sm:min-h-96">
             <iframe

@@ -70,11 +70,7 @@ export function PortfolioSection({
   return (
     <section id="works" className="scroll-mt-20 py-20 sm:py-32">
       <Container>
-        <SectionHeading
-          eyebrow="Работы"
-          title="Результат виден в отражении"
-          description="Галерея подготовлена как отдельный слой данных: позже работы можно будет загружать из административной панели и группировать по категориям."
-        />
+        <SectionHeading eyebrow="Работы" title="Результат виден в отражении" />
         <div className="grid gap-4 lg:grid-cols-3">
           {portfolioItems.map((item, index) => (
             <PortfolioCard key={item.id} item={item} featured={index === 0} />

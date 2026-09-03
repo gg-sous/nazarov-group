@@ -2,13 +2,13 @@ export const siteConfig = {
   name: "NazarovGroup",
   description:
     "Профессиональный уход, восстановление и защита вашего автомобиля.",
-  phone: "+7 (000) 000-00-00",
-  phoneHref: "tel:+70000000000",
-  address: "Адрес будет указан перед открытием записи",
-  schedule: "Ежедневно, по предварительной записи",
+  phone: "+7 (987) 243-09-93",
+  phoneHref: "tel:+79872430993",
+  address: "г. Уфа, ул. Ульяновых, 59а",
+  schedule: "Ежедневно, 10:00–20:00",
   telegram: "https://t.me/",
   vk: "https://vk.com/",
-  email: "hello@nazarovgroup.ru",
+  email: "idrisov.777@mail.ru",
 } as const;
 
 export const navigation = [
